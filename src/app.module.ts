@@ -8,7 +8,7 @@ import { AppController } from './app.controller';
 import { PostModule } from './post/post.module';
 
 import { HttpErrorFilter } from './shared/http-error.filter';
-import { LoggingInterceptor } from 'shared/loggin.interceptor';
+import { LoggingInterceptor } from 'shared/logging.interceptor';
 
 
 @Module({
