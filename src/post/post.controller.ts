@@ -4,7 +4,7 @@ import { PostService } from './post.service';
 import { PostDTO } from './post.dto';
 import { ValidationPipe } from 'shared/validation.pipe';
 
-@Controller('post')
+@Controller('api/post')
 export class PostController {
     private logger = new Logger('IdeaController');
 
