@@ -1,8 +1,10 @@
-import { Controller, Get, Post, Delete, Put, Body, Param, UsePipes, Logger } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Put, Body, Param, UsePipes, Logger, UseGuards } from '@nestjs/common';
 
 import { PostService } from './post.service';
 import { PostDTO } from './post.dto';
 import { ValidationPipe } from 'shared/validation.pipe';
+import { AuthGuard } from 'shared/auth.guard';
+import { User } from '../user/user.decorator';
 
 @Controller('api/post')
 export class PostController {
@@ -10,16 +12,24 @@ export class PostController {
 
     constructor(private postService : PostService){}
 
+    private logData(options: any){
+        options.user && this.logger.log('USER ' + JSON.stringify(options.user));
+        options.body && this.logger.log('DATA ' + JSON.stringify(options.body));
+        options.id && this.logger.log('POST ' + JSON.stringify(options.id));
+        
+    }
+
     @Get()
     showAllPosts(){
         return this.postService.showAll();
     }
 
     @Post()
+    @UseGuards(new AuthGuard())
     @UsePipes(new ValidationPipe())
-    createPost(@Body() data: PostDTO){
-        this.logger.log(JSON.stringify(data));
-        return this.postService.create(data);
+    createPost(@User('id') user, @Body() data: PostDTO){
+        this.logData({user,data});
+        return this.postService.create(user,data);
     }
 
     @Get(':id')
@@ -28,14 +38,16 @@ export class PostController {
     }
 
     @Put(':id')
+    @UseGuards(new AuthGuard())
     @UsePipes(new ValidationPipe())
-    updatePost(@Param('id') id: string, @Body() data: Partial<PostDTO>){
-        this.logger.log(JSON.stringify(data));
-        return this.postService.update(id,data);
+    updatePost(@Param('id') id: string,@User('id') user: string, @Body() data: Partial<PostDTO>){
+        this.logData({ id, user, data });
+        return this.postService.update(id,user,data);
     }
 
     @Delete(':id')
-    deletePost(@Param('id') id: string){
-        return this.postService.delete(id);
+    @UseGuards(new AuthGuard())
+    deletePost(@Param('id') id: string, @User('id') user : string){
+        return this.postService.delete(id,user);
     }
 }

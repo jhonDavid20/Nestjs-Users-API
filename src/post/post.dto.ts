@@ -1,4 +1,5 @@
 import { IsString } from 'class-validator';
+import { UserRO } from 'user/user.dto';
 
 export class PostDTO{
     @IsString()
@@ -6,4 +7,15 @@ export class PostDTO{
 
     @IsString()
     description: string;
+}
+
+export class PostRO{
+    id?: string;
+    updated: Date;
+    created: Date;
+    post: string;
+    description: string;
+    author: UserRO;
+
+
 }

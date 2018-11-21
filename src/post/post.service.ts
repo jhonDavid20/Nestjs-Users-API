@@ -3,54 +3,73 @@ import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { PostEntity } from './post.entity';
-import { PostDTO } from './post.dto';
+import { PostDTO, PostRO } from './post.dto';
+import { UserEntity } from 'user/user.entity';
 
 @Injectable()
 export class PostService {
     constructor(
         @InjectRepository(PostEntity) 
-        private postRepository: Repository<PostEntity>
+        private postRepository: Repository<PostEntity>,
+        @InjectRepository(UserEntity)
+        private userRepository: Repository<UserEntity>
     ){}
 
-    async showAll(){
-        return await this.postRepository.find();
+    private toResponseObject(post: PostEntity): PostRO{
+        return {...post, author: post.author.toResponseObject(false)};
     }
 
-    async create(data: PostDTO){
-        const post = await this.postRepository.create(data);
+    private ensureOwnership(post: PostEntity, userId: string){
+        if(post.author.id !== userId){
+            throw new HttpException('Incorrect User', HttpStatus.UNAUTHORIZED);
+        }
+
+    }
+
+    async showAll(): Promise<PostRO[]>{
+       const post = await this.postRepository.find({ relations: ['author']});
+       return post.map(post => this.toResponseObject(post));
+    }
+
+    async create(userId: string, data: PostDTO): Promise<PostRO>{
+        const user = await this.userRepository.findOne({ id : userId  });
+        console.log(user);
+        const post = await this.postRepository.create({...data, author: user});
         await this.postRepository.save(post);
-        return post;
+        return this.toResponseObject(post);
     }
     
-    async show(id: string){
-        const post = await this.postRepository.findOne({ where: { id } });
+    async show(id: string): Promise<PostRO>{
+        const post = await this.postRepository.findOne( { id : id }, { relations: ['author'] });
 
         if(!post){
             throw new HttpException("Not Found", HttpStatus.NOT_FOUND);
         }
 
-        return post;
+        return this.toResponseObject(post);
     }
 
-    async update(id: string, data: Partial<PostDTO>){
-        let post = await this.postRepository.findOne( { where: { id } } );
+    async update(id: string, userId: string, data: Partial<PostDTO>): Promise<PostRO>{
+        let post = await this.postRepository.findOne( { id:  id }, {relations: ['author'] } );
         
         if(!post){
             throw new HttpException("Not Found", HttpStatus.NOT_FOUND);
         }
-        await this.postRepository.update({ id }, data);
-        post = await this.postRepository.findOne({ where: { id } });
+        this.ensureOwnership(post,userId);
+        await this.postRepository.update({ id: id }, data);
+        post = await this.postRepository.findOne({ id:  id  }, {relations: ['author'] } );
 
-        return post;
+        return this.toResponseObject(post);
     }
 
-    async delete(id: string){
-        const post = await this.postRepository.findOne( { where: { id } } );
+    async delete(id: string, userId: string){
+        const post = await this.postRepository.findOne( { id:  id  }, {relations: ['author'] } );
         
         if(!post){
             throw new HttpException("Not Found", HttpStatus.NOT_FOUND);
         }
-        await this.postRepository.delete({ id });
+        this.ensureOwnership(post,userId);
+        await this.postRepository.delete({ id: id });
         return post;
     }
 }
