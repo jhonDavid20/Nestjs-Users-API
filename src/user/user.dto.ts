@@ -1,4 +1,5 @@
 import { IsNotEmpty } from "class-validator";
+import { PostEntity } from "post/post.entity";
 
 export class UserDTO {
     
@@ -14,4 +15,5 @@ export class UserRO {
     username: string;
     created: Date;
     token?: string;
+    bookmarks?: PostEntity[];
 }

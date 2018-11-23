@@ -50,4 +50,32 @@ export class PostController {
     deletePost(@Param('id') id: string, @User('id') user : string){
         return this.postService.delete(id,user);
     }
+
+    @Post('/bookmark/:id')
+    @UseGuards(new AuthGuard())
+    bookmarkPost(@Param('id') id: string, @User('id') user: string){
+        this.logData({ id, user });
+        return this.postService.bookmark(id,user);
+    }
+
+    @Delete('/bookmark/:id')
+    @UseGuards(new AuthGuard())
+    unbookmarkPost(@Param('id') id: string, @User('id') user: string){
+        this.logData({ id, user });
+        return this.postService.unbookmark(id,user);
+    }
+
+    @Post('upvote/:id')
+    @UseGuards(new AuthGuard())
+    upvotePost(@Param('id') id: string, @User('id') userId: string){
+        this.logData({ id, userId });
+        return this.postService.upvote(id,userId);
+    }
+
+    @Post('downvote/:id')
+    @UseGuards(new AuthGuard())
+    downvotePost(@Param('id') id: string, @User('id') userId: string){
+        this.logData({ id, userId });
+        return this.postService.downvote(id,userId);
+    }
 }

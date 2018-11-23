@@ -16,6 +16,7 @@ export class PostRO{
     post: string;
     description: string;
     author: UserRO;
-
+    upvotes?: number;
+    downvotes?: number;
 
 }

@@ -11,7 +11,7 @@ export class UserService {
         private userRepository: Repository<UserEntity>
     ){}
     async showAll(): Promise<UserRO[]>{
-        const users = await this.userRepository.find({ relations: ['post'] });
+        const users = await this.userRepository.find({ relations: ['post', 'bookmarks'] });
         return users.map( user => user.toResponseObject(false));
     }
 

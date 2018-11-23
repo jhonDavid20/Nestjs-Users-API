@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, CreateDateColumn, Column, ManyToMany, ManyToOne, UpdateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, CreateDateColumn, Column, ManyToMany, ManyToOne, UpdateDateColumn, JoinTable } from 'typeorm';
 
 import { UserEntity } from 'user/user.entity';
 
@@ -21,4 +21,12 @@ export class PostEntity{
 
     @ManyToOne(type => UserEntity, author => author.post)
     author: UserEntity;
+
+    @ManyToMany(type => UserEntity, {cascade:true})
+    @JoinTable()
+    upvotes: UserEntity[];
+
+    @ManyToMany(type => UserEntity, {cascade:true})
+    @JoinTable()
+    downvotes: UserEntity[];
 }
