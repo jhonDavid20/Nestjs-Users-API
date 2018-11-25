@@ -53,7 +53,7 @@ export class PostService {
     }
 
     async showAll(): Promise<PostRO[]>{
-       const post = await this.postRepository.find({ relations: ['author', 'upvotes', 'downvotes']});
+       const post = await this.postRepository.find({ relations: ['author', 'upvotes', 'downvotes', 'comments']});
        return post.map(post => this.toResponseObject(post));
     }
 
@@ -65,7 +65,7 @@ export class PostService {
     }
 
     async show(id: string): Promise<PostRO>{
-        const post = await this.postRepository.findOne( { id: id }, { relations: ['author', 'upvotes', 'downvotes'] });
+        const post = await this.postRepository.findOne( { id: id }, { relations: ['author', 'upvotes', 'downvotes', 'comments'] });
 
         if (!post){
             throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
@@ -82,13 +82,13 @@ export class PostService {
         }
         this.ensureOwnership(post,userId);
         await this.postRepository.update({ id: id }, data);
-        post = await this.postRepository.findOne({ id:  id  }, {relations: ['author'] } );
+        post = await this.postRepository.findOne({ id:  id  }, {relations: ['author', 'comments'] } );
 
         return this.toResponseObject(post);
     }
 
     async delete(id: string, userId: string){
-        const post = await this.postRepository.findOne( { id:  id  }, {relations: ['author'] } );
+        const post = await this.postRepository.findOne( { id:  id  }, {relations: ['author', 'comments'] } );
         
         if(!post){
             throw new HttpException("Not Found", HttpStatus.NOT_FOUND);
@@ -131,7 +131,7 @@ export class PostService {
     }
 
     async upvote(id: string, userId: string){
-        let post = await this.postRepository.findOne({ id: id}, {relations: ['author', 'upvotes', 'downvotes'] });
+        let post = await this.postRepository.findOne({ id: id}, {relations: ['author', 'upvotes', 'downvotes', 'comments'] });
         const user = await this.userRepository.findOne({ id: userId});
        
         post = await this.vote(post,user,Votes.UP);
@@ -140,7 +140,7 @@ export class PostService {
     }
 
     async downvote(id: string, userId: string){
-        let post = await this.postRepository.findOne({ id: id}, {relations: ['author','upvotes', 'downvotes'] });
+        let post = await this.postRepository.findOne({ id: id}, {relations: ['author','upvotes', 'downvotes', 'comments'] });
         const user = await this.userRepository.findOne({ id: userId});
        
         post = await this.vote(post,user,Votes.DOWN);

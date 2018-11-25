@@ -3,6 +3,7 @@ import * as bcrypt from 'bcryptjs';
 import * as jwt from 'jsonwebtoken';
 import { UserRO } from "./user.dto";
 import { PostEntity } from "post/post.entity";
+import { CommentEntity } from "comment/comment.entity";
 
 @Entity('user')
 export class UserEntity {
@@ -23,7 +24,7 @@ export class UserEntity {
 
     @OneToMany(type => PostEntity, post => post.author)
     post: PostEntity[];
-
+    
     @ManyToMany(type => PostEntity, {cascade: true})
     @JoinTable()
     bookmarks: PostEntity[];
